@@ -17,6 +17,8 @@ cc.Class({
 
         validMoveArr: [],
 
+        visitedNodeArr: [],
+
 
     },
 
@@ -28,6 +30,8 @@ cc.Class({
         this.levelInfo = levelInfo;
         this.currentPos = Number(levelInfo.StartIndex);
         this.nodeArr = nodeArr;
+        this.visitedNodeArr = [];
+        this.visitedNodeArr.push(this.currentPos);
     },
 
     playerMakesMove: function (event, customEventData) {
@@ -39,12 +43,24 @@ cc.Class({
     makeMove: function (nodeArr, playerCurrentPos, playerTargetPos) {
         // Called when a player tries to make move on the matrix
 
+        var flag;
         var validMove = this.validatePLayerMove(playerTargetPos);
         console.log(nodeArr, playerCurrentPos, playerTargetPos, validMove);
 
-        if (validMove) {
+        if(playerTargetPos == this.levelInfo.EndIndex && this.visitedNodeArr.length == 8){
+            flag = true;
+        }
+        else if(playerTargetPos != this.levelInfo.EndIndex){
+            flag = true;
+        }
+        else{
+            flag = false;
+        }
+        console.log(this.visitedNodeArr);
+        if (validMove && flag) {
             this.node.setPosition(nodeArr[playerTargetPos - 1]);
             this.setLevel.drawCircle(nodeArr[playerCurrentPos - 1], cc.Color.GREEN);
+            this.visitedNodeArr.push(playerTargetPos);
             this.levelInfo.BlockerPair.push([playerCurrentPos, playerTargetPos]);
             for (let index = 0; index < this.validMoveArr.length; index++) {
                 this.levelInfo.BlockerPair.push([this.validMoveArr[index], this.currentPos]);
@@ -93,23 +109,23 @@ cc.Class({
         // Update list of valid moves that a player can make after making a move
 
         switch (currentPos) {
-            case 1: return [2, 4, 5];
+            case 1: return [2, 4, 5, 6, 8];
 
-            case 2: return [1, 3, 4, 5, 6];
+            case 2: return [1, 3, 4, 5, 6, 7, 9];
 
-            case 3: return [2, 5, 6];
+            case 3: return [2, 4, 5, 6, 8];
 
-            case 4: return [1, 2, 5, 7, 8];
+            case 4: return [1, 2, 3, 5, 7, 8, 9];
 
             case 5: return [1, 2, 3, 4, 6, 7, 8, 9];
 
-            case 6: return [2, 3, 5, 8, 9];
+            case 6: return [1, 2, 3, 5, 7, 8, 9];
 
-            case 7: return [4, 5, 8];
+            case 7: return [2, 4, 5, 6, 8];
 
-            case 8: return [4, 5, 6, 7, 9];
+            case 8: return [1, 3, 4, 5, 6, 7, 9];
 
-            case 9: return [5, 6, 8];
+            case 9: return [2, 4, 5, 6, 8];
         }
     },
 });
