@@ -47,24 +47,21 @@ cc.Class({
         var validMove = this.validatePLayerMove(playerTargetPos);
         console.log(nodeArr, playerCurrentPos, playerTargetPos, validMove);
 
-        if(playerTargetPos == this.levelInfo.EndIndex && this.visitedNodeArr.length == 8){
+        if (playerTargetPos == this.levelInfo.EndIndex && this.visitedNodeArr.length == 8) {
             flag = true;
         }
-        else if(playerTargetPos != this.levelInfo.EndIndex){
+        else if (playerTargetPos != this.levelInfo.EndIndex && !this.visitedNodeArr.includes(playerTargetPos)) {
             flag = true;
         }
-        else{
+        else {
             flag = false;
         }
         console.log(this.visitedNodeArr);
         if (validMove && flag) {
-            this.node.setPosition(nodeArr[playerTargetPos - 1]);
+            var actionBy = cc.moveTo(1, nodeArr[playerTargetPos - 1].getPosition());
+            this.node.runAction(actionBy);
             this.setLevel.drawCircle(nodeArr[playerCurrentPos - 1], cc.Color.GREEN);
             this.visitedNodeArr.push(playerTargetPos);
-            this.levelInfo.BlockerPair.push([playerCurrentPos, playerTargetPos]);
-            for (let index = 0; index < this.validMoveArr.length; index++) {
-                this.levelInfo.BlockerPair.push([this.validMoveArr[index], this.currentPos]);
-            }
             this.currentPos = playerTargetPos;
         }
 
@@ -102,6 +99,20 @@ cc.Class({
             else if (this.levelInfo.BlockerPair[i][1] == this.currentPos && this.levelInfo.BlockerPair[i][0] == targetPos) {
                 this.validMoveArr.splice(this.validMoveArr.indexOf(this.levelInfo.BlockerPair[i][0]), 1);
             }
+            else {
+                var a = this.nodeArr[this.levelInfo.BlockerPair[i][0] - 1].getPosition();
+                var b = this.nodeArr[this.levelInfo.BlockerPair[i][1] - 1].getPosition();
+                var c = this.nodeArr[this.currentPos - 1];
+                var d = this.nodeArr[targetPos - 1];
+
+                flag = this.doIntersect(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+
+                console.log("LINES INTERSECT", flag, a, b, c, d)
+                if (flag) {
+                    this.validMoveArr.splice(this.validMoveArr.indexOf(targetPos), 1);
+                }
+
+            }
         }
     },
 
@@ -126,6 +137,18 @@ cc.Class({
             case 8: return [1, 3, 4, 5, 6, 7, 9];
 
             case 9: return [2, 4, 5, 6, 8];
+        }
+    },
+
+    doIntersect: function (l, m, n, o, p, q, r, s) {
+        var determinant, gamma, lambda;
+        determinant = (n - l) * (s - q) - (r - p) * (o - m);
+        if (determinant === 0) {
+            return false;
+        } else {
+            lambda = ((s - q) * (r - l) + (p - r) * (s - m)) / determinant;
+            gamma = ((m - o) * (r - l) + (n - l) * (s - m)) / determinant;
+            return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
         }
     },
 });
